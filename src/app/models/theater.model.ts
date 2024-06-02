@@ -1,3 +1,4 @@
+import { Projector } from "./projector.model";
 import { Seat } from "./seat.model";
 
 export class Theater {
@@ -5,4 +6,5 @@ export class Theater {
     location: string;
     capacity: number;
     seats?: Seat[];
+    projector?: Projector
 }

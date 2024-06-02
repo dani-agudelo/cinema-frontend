@@ -12,39 +12,76 @@
                     <h3 *ngIf="mode==3" class="mb-0">Actualizar</h3>
                 </div>
                 <div class="card-body">
-                    <div class="container">
-                        <div class="row">
-                            <div class="col-4">
-                                Id:
+                    <!-- theFormGroup es la variable de instancia, se pone acá -->
+                    <form class="form" [formGroup]="theFormGroup">
+                        <div class="container">
+                            <div class="row" *ngIf="mode!=2">
+                                <div class="col-4">
+                                    Id:
+                                </div>
+                                <div class="col-8">
+                                    {{theater.id}}
+                                </div>
                             </div>
-                            <div class="col-8">
-                                {{theater.id}}
+                            <div class="row">
+                                <div class="col-4">
+                                    Ubicación:
+                                </div>
+                                <div class="col-8">
+                                    <!-- [] indican un enlace de propiedad  -->
+                                    <!-- Establece la propiedad disabled del elemento html igual al resultadoo de la expresión -->
+                                    <input type="text" class="form-control" [(ngModel)]="theater.location"
+                                        [disabled]="mode==1" formControlName="location">
+                                    <div>
+                                        <div
+                                            *ngIf="getTheFormGroup.location.errors && (getTheFormGroup.location.dirty || getTheFormGroup.location.touched ||trySend)">
+                                            <strong *ngIf="getTheFormGroup.location.errors.required" class="msnError">
+                                                Ubicación es requerida</strong>
+                                            <strong *ngIf="getTheFormGroup.location.errors.minlength" class="msnError">Inválido</strong>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-4">
+                                    Capacidad:
+                                </div>
+                                <div class="col-8">
+                                    <input type="number" class="form-control" [(ngModel)]="theater.capacity"
+                                        [disabled]="mode==1" formControlName="capacity">
+                                    <!-- dirty significa que el campo ya ha sido modificado, touched que ya ha sido tocado-->
+                                    <div *ngIf="getTheFormGroup.capacity.errors && (getTheFormGroup.capacity.dirty ||
+                                        getTheFormGroup.capacity.touched ||trySend)">
+                                        <strong *ngIf="getTheFormGroup.capacity.errors.required" class="msnError">Capacidad es
+                                            requerida</strong>
+                                        <strong *ngIf="getTheFormGroup.capacity.errors.min" class="msnError">Valor mínimo debe ser 1</strong>
+                                        <strong *ngIf="getTheFormGroup.capacity.errors.max" class="msnError">Valor máximo es 100</strong>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-4">
+                                    Proyector
+                                </div>
+                                <div class="col-8">
+                                    <select class="form-control" formControlName="idProjector"
+                                        [(ngModel)]="theater.projector.id">
+                                        <option *ngFor="let option of projectors" [value]="option.id">Marca:
+                                            {{option.brand}} - Alto: {{option.high}} - Ancho:{{option.width}} </option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-4"></div>
+                                <div class="col-8">
+                                    <button *ngIf="mode==2" class="btn btn-primary btn-block"
+                                        (click)="create()">Crear</button>
+                                    <button *ngIf="mode==3" class="btn btn-primary btn-block"
+                                        (click)="update()">Actualizar</button>
+                                </div>
                             </div>
                         </div>
-                        <div class="row">
-                            <div class="col-4">
-                                Ubicación:
-                            </div>
-                            <div class="col-8">
-                                <input type="text" class="form-control" [(ngModel)]="theater.location" [disabled]="mode==1">
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-4">
-                                Capacidad:
-                            </div>
-                            <div class="col-8">
-                                <input type="number" class="form-control" [(ngModel)]="theater.capacity" [disabled]="mode==1">
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-4"></div>
-                            <div class="col-8">
-                                <button *ngIf="mode==2" class="btn btn-primary btn-block" (click)="create()">Crear</button>
-                                <button *ngIf= "mode==3" class="btn btn-primary btn-block"(click)="update()">Actualizar</button>
-                            </div>
-                        </div>
-                      </div>
+                    </form>
                 </div>
             </div>
         </div>

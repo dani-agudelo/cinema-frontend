@@ -1,7 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
+import { Projector } from 'src/app/models/projector.model';
 import { Theater } from 'src/app/models/theater.model';
+import { ProjectorService } from 'src/app/services/projector.service';
 import { TheaterService } from 'src/app/services/theater.service';
 import Swal from 'sweetalert2';
 
@@ -14,40 +16,57 @@ export class ManageComponent implements OnInit {
   mode: number // 1--> View, 2-->Create, 3-->Update
   theater: Theater;
   theFormGroup: FormGroup;
+  trySend: boolean;
+  projectors: Projector[]
 
-  constructor(private activateRoute: ActivatedRoute, 
-              private service: TheaterService,
-              private router: Router) {
+  constructor(private activateRoute: ActivatedRoute,
+    private service: TheaterService,
+    private router: Router,
+    private theFormBuilder: FormBuilder,
+    private projectorsService: ProjectorService) {
+    this.projectors = []
+    this.trySend = false;
+    // se inicializa en 1 para que por defecto se muestre la vista
     this.mode = 1;
     this.theater = {
       id: 0,
       capacity: 0,
       location: '',
+      projector: {
+        id: 0
+      }
     }
+    this.configFormGroup();
   }
-  //configFormGroup();
 
-  // configFormGroup() {
-  //   this.theFormGroup = this.theFormBuilder.group({
-  //     // primer elemento es el valor por defecto
-  //     // segundo elemento es la validación
-  //     capacity: ['', [Validators.min(1), Validators.max(100)]],
-  //     location: ['', [Validators.minLength(2)]]
-  //   });
-  // }
 
-  // // Getter para acceder a los controles del formulario
-  // get getTheFormGroup() {
-  //   return this.theFormGroup.controls;
-  // }
+  /**
+   * Configures the form group for managing theaters.
+   */
+  configFormGroup() {
+    this.theFormGroup = this.theFormBuilder.group({
+      // primer elemento es el valor por defecto
+      // segundo elemento es un array de validaciones 
+      capacity: ['', [Validators.required, Validators.min(1), Validators.max(100)]],
+      location: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(20)]],
+      idProjector: [null, [Validators.required]]
+    });
+  }
+
+  // Getter para acceder a los controles del formulario, para saber que se ha ingresado
+  // Al ser un get se puede acceder luego sin ()
+  get getTheFormGroup() {
+    return this.theFormGroup.controls;
+  }
 
   // getTheaterData() {
   //   this.theater.capacity = this.getTheFormGroup.capacity.value;
   //   this.theater.location = this.getTheFormGroup.location.value;
-    
   // }
 
   ngOnInit(): void {
+    this.projectorsList()
+
     const currentUrl = this.activateRoute.snapshot.url.join('/');
 
     if (currentUrl.includes('view')) {
@@ -66,26 +85,41 @@ export class ManageComponent implements OnInit {
     }
   }
 
-  getTheater(id: number) {
-    this.service.view(id).subscribe(data => {
-      this.theater = data;
-      console.log('Theater: ' + JSON.stringify(this.theater));
+  projectorsList() {
+    this.projectorsService.listar().subscribe(data => {
+      this.projectors = data
 
     })
   }
 
-  create(){
-    this.service.create(this.theater).subscribe(data=>{
+  getTheater(id: number) {
+    this.service.view(id).subscribe(data => {
+      this.theater = data;
+      console.log('Theater: ' + JSON.stringify(this.theater));
+    })
+  }
+
+  create() {
+    if (this.theFormGroup.invalid) {
+      this.trySend = true;
+      Swal.fire('Error', 'Por favor complete los campos requeridos', 'error');
+      return;
+    }
+    this.service.create(this.theater).subscribe(data => {
       Swal.fire('Creación exitosa', 'Se ha creado un nuevo registro', 'success')
       this.router.navigate(["theaters/list"])
     })
   }
 
-  update(){
-    this.service.create(this.theater).subscribe(data=>{
+  update() {
+    if (this.theFormGroup.invalid) {
+      this.trySend = true;
+      Swal.fire('Error', 'Por favor complete los campos requeridos', 'error');
+      return;
+    }
+    this.service.create(this.theater).subscribe(data => {
       Swal.fire('Actualización exitosa', 'Se ha actualizado un registro', 'success')
       this.router.navigate(["theaters/list"])
-
     })
   }
 }
